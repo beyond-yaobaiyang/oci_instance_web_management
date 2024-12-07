@@ -17,7 +17,7 @@
 ### 1. 准备环境
 ```bash
 # 克隆项目
-git clone [https://github.com/your_username/oci-management-platform.git](https://github.com/beyond-yaobaiyang/oci_instance_web_management)
+git clone https://github.com/beyond-yaobaiyang/oci_instance_web_management
 cd oci_instance_web_management
 
 # 安装依赖
@@ -26,8 +26,11 @@ pip install -r requirements.txt
 
 ### 2. 配置租户信息
 编辑 `config.yaml`，添加您的 OCI 租户配置：
-
+users 下面是面板登录信息
 ```yaml
+users:
+  - username: admin
+    password: admin123
 tenants:
   - name: my_tenant
     user: ocid1.user.oc1..example
@@ -40,7 +43,7 @@ tenants:
 
 ### 3. 启动应用
 ```bash
-python app.py
+python app.py &
 ```
 
 浏览器访问 `http://你的ip:5000`
