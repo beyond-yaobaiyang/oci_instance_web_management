@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OCI Instance Management - Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        .header a {
+            color: #3498db;
+            text-decoration: none;
+            margin-left: 15px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .header a:hover {
+            background-color: #f8f9fa;
+        }
+        .instances-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .action-buttons button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .start-btn { 
+            background-color: #2ecc71; 
+            color: white;
+        }
+        .start-btn:hover {
+            background-color: #27ae60;
+        }
+        .stop-btn { 
+            background-color: #e74c3c; 
+            color: white;
+        }
+        .stop-btn:hover {
+            background-color: #c0392b;
+        }
+        .restart-btn { 
+            background-color: #f1c40f; 
+            color: #2c3e50;
+        }
+        .restart-btn:hover {
+            background-color: #f39c12;
+        }
+        .details-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        .details-btn:hover {
+            background-color: #2980b9;
+        }
+        .terminate-btn { 
+            background-color: #e74c3c; 
+            color: white;
+        }
+        .terminate-btn:hover {
+            background-color: #c0392b;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+            text-transform: capitalize;
+        }
+        .status-running {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-stopped {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .status-provisioning {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        .status-terminating {
+            background-color: #fbe9e7;
+            color: #d84315;
+        }
+        .status-terminated {
+            background-color: #efebe9;
+            color: #6d4c41;
+        }
+        .status-stopping {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        .status-starting {
+            background-color: #f1f8e9;
+            color: #558b2f;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+            margin: 20px auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .modal-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+        .instance-details {
+            margin: 15px 0;
+        }
+        .instance-details .detail-item {
+            display: flex;
+            margin-bottom: 12px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .instance-details .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            width: 150px;
+            flex-shrink: 0;
+        }
+        .instance-details .detail-value {
+            color: #34495e;
+        }
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .modal-footer button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .close-btn {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .close-btn:hover {
+            background-color: #bdbdbd;
+        }
+        .terminate-confirmation {
+            padding: 20px;
+            background-color: #fff3f3;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .terminate-confirmation h3 {
+            color: #c0392b;
+            margin-top: 0;
+        }
+        .terminate-confirmation .confirmation-steps {
+            margin-top: 15px;
+        }
+        .terminate-confirmation label {
+            display: block;
+            margin-bottom: 12px;
+            color: #2c3e50;
+        }
+        .terminate-confirmation input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        .terminate-confirmation input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        /* 控制面板样式 */
+        .control-panel {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* 下拉框样式 */
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #2c3e50;
+            background-color: white;
+            min-width: 200px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        select:hover {
+            border-color: #3498db;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        /* 刷新按钮样式 */
+        .refresh-btn {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .refresh-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        /* 确认对话框样式 */
+        .confirm-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .confirm-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .confirm-header {
+            margin-bottom: 20px;
+        }
+        
+        .confirm-header h3 {
+            margin: 0;
+            color: #e74c3c;
+            font-size: 20px;
+        }
+        
+        .confirm-body {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .confirm-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .confirm-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .confirm-yes {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .confirm-yes:hover {
+            background-color: #c0392b;
+        }
+        
+        .confirm-no {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .confirm-no:hover {
+            background-color: #7f8c8d;
+        }
+        
+        /* 实例详情模态框样式 */
+        .instance-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .instance-details-modal .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .instance-details-modal .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s;
+        }
+        
+        .instance-details-modal .close-btn:hover {
+            color: #333;
+        }
+        
+        .instance-details-modal .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .instance-details-modal .detail-item {
+            display: flex;
+            flex-direction: column;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .instance-details-modal .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .instance-details-modal .detail-value {
+            color: #34495e;
+            word-break: break-all;
+        }
+        
+        .instance-details-modal .network-details {
+            background-color: #f4f6f9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .instance-details-modal .network-interface {
+            background-color: white;
+            border: 1px solid #e0e4e8;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>OCI实例管理</h1>
+            <div>
+                <span>欢迎, {{ username }}!</span>
+                <a href="{{ url_for('logout') }}" class="logout-btn">退出</a>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <select id="tenant-select" onchange="loadRegions()">
+                <option value="">选择租户</option>
+            </select>
+            
+            <select id="region-select" onchange="fetchInstances()">
+                <option value="">选择区域</option>
+            </select>
+            
+            <button class="refresh-btn" onclick="fetchInstances()">
+                <i class="fas fa-sync-alt"></i> 刷新实例列表
+            </button>
+        </div>
+
+        <div class="instances-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>实例名称</th>
+                        <th>状态</th>
+                        <th>可用性域</th>
+                        <th>形状</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="instancesTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 加载租户列表
+        async function loadTenants() {
+            const tenantSelect = document.getElementById('tenant-select');
+            
+            try {
+                const response = await fetch('/config/tenants');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const tenants = await response.json();
+                
+                tenantSelect.innerHTML = `
+                    <option value="">选择租户</option>
+                    ${tenants.map(tenant => `
+                        <option value="${tenant.name}">${tenant.name}</option>
+                    `).join('')}
+                `;
+            } catch (error) {
+                console.error('获取租户列表失败:', error);
+                showError('获取租户列表失败，请刷新页面重试');
+                tenantSelect.innerHTML = '<option value="">加载租户失败</option>';
+            }
+        }
+
+        // 加载区域列表
+        async function loadRegions() {
+            const tenantSelect = document.getElementById('tenant-select');
+            const regionSelect = document.getElementById('region-select');
+            const selectedTenant = tenantSelect.value;
+            
+            if (!selectedTenant) {
+                regionSelect.innerHTML = '<option value="">请先选择租户</option>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/regions?tenant=${encodeURIComponent(selectedTenant)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const regions = await response.json();
+                
+                regionSelect.innerHTML = `
+                    <option value="">选择区域</option>
+                    ${regions.map(region => `
+                        <option value="${region.key}">${region.name}</option>
+                    `).join('')}
+                `;
+                
+                // 加载区域后自动获取实例列表
+                fetchInstances();
+            } catch (error) {
+                console.error('获取区域列表失败:', error);
+                showError('获取区域列表失败，请重试');
+                regionSelect.innerHTML = '<option value="">加载区域失败</option>';
+            }
+        }
+
+        // 获取实例列表
+        async function fetchInstances() {
+            const tenantSelect = document.getElementById('tenant-select');
+            const regionSelect = document.getElementById('region-select');
+            const instancesTableBody = document.getElementById('instancesTableBody');
+            
+            const selectedTenant = tenantSelect.value;
+            const selectedRegion = regionSelect.value;
+            
+            if (!selectedTenant || !selectedRegion) {
+                instancesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">请选择租户和区域</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/instances?tenant=${encodeURIComponent(selectedTenant)}&region=${encodeURIComponent(selectedRegion)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const instances = await response.json();
+                
+                if (instances.length === 0) {
+                    instancesTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">当前区域没有实例</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                instancesTableBody.innerHTML = instances.map(instance => `
+                    <tr>
+                        <td>${instance.display_name}</td>
+                        <td>
+                            <span class="status-badge ${getStatusBadgeClass(instance.lifecycle_state)}">
+                                ${getStatusDisplay(instance.lifecycle_state)}
+                            </span>
+                        </td>
+                        <td>${instance.availability_domain}</td>
+                        <td>${instance.shape}</td>
+                        <td>${new Date(instance.time_created).toLocaleString()}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="details-btn" onclick="viewInstanceDetails('${instance.id}')">
+                                    <i class="fas fa-info-circle"></i> 详情
+                                </button>
+                                <button class="start-btn" onclick="manageInstance('${instance.id}', 'start')" ${instance.lifecycle_state === 'RUNNING' ? 'disabled' : ''}>
+                                    <i class="fas fa-play"></i> 启动
+                                </button>
+                                <button class="stop-btn" onclick="manageInstance('${instance.id}', 'stop')" ${instance.lifecycle_state === 'STOPPED' ? 'disabled' : ''}>
+                                    <i class="fas fa-stop"></i> 停止
+                                </button>
+                                <button class="restart-btn" onclick="manageInstance('${instance.id}', 'restart')" ${instance.lifecycle_state !== 'RUNNING' ? 'disabled' : ''}>
+                                    <i class="fas fa-sync"></i> 重启
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('获取实例列表失败:', error);
+                showError('获取实例列表失败，请重试');
+                instancesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-danger">获取实例列表失败</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // 管理实例（启动、停止、重启）
+        async function manageInstance(instanceId, action) {
+            // 需要确认的操作
+            const needConfirm = ['stop', 'restart'];
+            
+            if (needConfirm.includes(action)) {
+                const confirmed = await showConfirmDialog(action);
+                if (!confirmed) {
+                    return;
+                }
+            }
+            
+            const tenantSelect = document.getElementById('tenant-select');
+            const regionSelect = document.getElementById('region-select');
+            
+            try {
+                const response = await fetch('/manage_instance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        tenant: tenantSelect.value,
+                        region: regionSelect.value,
+                        instance_id: instanceId,
+                        action: action
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showSuccess(`实例${getActionName(action)}请求已发送`);
+                    setTimeout(fetchInstances, 2000);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error(`${action}实例失败:`, error);
+                showError(`${action}实例失败: ${error.message}`);
+            }
+        }
+
+        function getActionName(action) {
+            const actionNames = {
+                'start': '启动',
+                'stop': '停止',
+                'restart': '重启'
+            };
+            return actionNames[action] || action;
+        }
+        
+        function showConfirmDialog(action) {
+            return new Promise((resolve) => {
+                const dialog = document.createElement('div');
+                dialog.className = 'confirm-dialog';
+                
+                const actionName = getActionName(action);
+                const message = `确定要${actionName}该实例吗？`;
+                
+                dialog.innerHTML = `
+                    <div class="confirm-content">
+                        <div class="confirm-header">
+                            <h3>${actionName}实例</h3>
+                        </div>
+                        <div class="confirm-body">
+                            <p>${message}</p>
+                        </div>
+                        <div class="confirm-footer">
+                            <button class="confirm-btn confirm-no">取消</button>
+                            <button class="confirm-btn confirm-yes">确定</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(dialog);
+                
+                const confirmYes = dialog.querySelector('.confirm-yes');
+                const confirmNo = dialog.querySelector('.confirm-no');
+                
+                confirmYes.onclick = () => {
+                    dialog.remove();
+                    resolve(true);
+                };
+                
+                confirmNo.onclick = () => {
+                    dialog.remove();
+                    resolve(false);
+                };
+                
+                dialog.onclick = (e) => {
+                    if (e.target === dialog) {
+                        dialog.remove();
+                        resolve(false);
+                    }
+                };
+            });
+        }
+        
+        function getStatusBadgeClass(state) {
+            const stateMap = {
+                'RUNNING': 'status-running',
+                'STOPPED': 'status-stopped',
+                'STOPPING': 'status-stopping',
+                'STARTING': 'status-starting',
+                'TERMINATING': 'status-terminating',
+                'TERMINATED': 'status-terminated',
+                'PROVISIONING': 'status-provisioning'
+            };
+            return stateMap[state] || 'status-unknown';
+        }
+
+        function getStatusDisplay(state) {
+            const stateMap = {
+                'RUNNING': '运行中',
+                'STOPPED': '已停止',
+                'STOPPING': '停止中',
+                'STARTING': '启动中',
+                'TERMINATING': '终止中',
+                'TERMINATED': '已终止',
+                'PROVISIONING': '配置中'
+            };
+            return stateMap[state] || state;
+        }
+
+        async function viewInstanceDetails(instanceId) {
+            try {
+                const tenantSelect = document.getElementById('tenant-select');
+                const regionSelect = document.getElementById('region-select');
+                
+                const response = await fetch(`/instance_details/${instanceId}?tenant=${encodeURIComponent(tenantSelect.value)}&region=${encodeURIComponent(regionSelect.value)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const instance = await response.json();
+                
+                // 创建模态框
+                const modal = document.createElement('div');
+                modal.className = 'instance-details-modal';
+                
+                // 实例详情内容
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 700px;">
+                        <div class="modal-header">
+                            <h2>实例详情</h2>
+                        </div>
+                        <div class="instance-details">
+                            <div class="detail-item">
+                                <div class="detail-label">实例ID</div>
+                                <div class="detail-value">${instance.id}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">显示名称</div>
+                                <div class="detail-value">${instance.display_name}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">状态</div>
+                                <div class="detail-value">
+                                    <span class="status-badge ${getStatusBadgeClass(instance.lifecycle_state)}">
+                                        ${getStatusDisplay(instance.lifecycle_state)}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">可用性域</div>
+                                <div class="detail-value">${instance.availability_domain}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">形状</div>
+                                <div class="detail-value">${instance.shape}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">OCPU数量</div>
+                                <div class="detail-value">${instance.ocpus || '未知'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">内存大小</div>
+                                <div class="detail-value">${instance.memory_in_gbs || '未知'} GB</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">创建时间</div>
+                                <div class="detail-value">${new Date(instance.time_created).toLocaleString()}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">公网IP</div>
+                                <div class="detail-value">${instance.public_ip || '无'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">私有IP</div>
+                                <div class="detail-value">${instance.private_ip || '无'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">操作系统</div>
+                                <div class="detail-value">${instance.image_os_version || '未知'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">区域</div>
+                                <div class="detail-value">${instance.region}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">区间</div>
+                                <div class="detail-value">${instance.compartment_id}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">故障域</div>
+                                <div class="detail-value">${instance.fault_domain || '未知'}</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="close-btn" onclick="this.closest('.instance-details-modal').remove()">关闭</button>
+                        </div>
+                    </div>
+                `;
+                
+                // 点击模态框外部关闭
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+                
+                document.body.appendChild(modal);
+            } catch (error) {
+                console.error('获取实例详情失败:', error);
+                showError('获取实例详情失败');
+            }
+        }
+
+        // 显示错误消息
+        function showError(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.dashboard-container').insertBefore(alertDiv, document.querySelector('.instances-section'));
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // 显示成功消息
+        function showSuccess(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.dashboard-container').insertBefore(alertDiv, document.querySelector('.instances-section'));
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTenants();
+            // 添加自动刷新
+            setInterval(fetchInstances, 30000); // 每30秒刷新一次
+        });
+    </script>
+    
+    <!-- 添加 Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</body>
+</html>
