@@ -1,18 +1,10 @@
 # OCI Instance web Management
 
-## 🌐 项目概述
+## 项目概述
 
-本项目是一个现代化、用户友好的 Oracle Cloud Infrastructure (OCI) 实例管理系统，旨在提供简单、高效的多租户实例监控和管理解决方案。
+本项目是一个基于 Oracle Cloud Infrastructure (OCI) python sdk的实例管理系统，旨在提供简单、高效的多租户实例管理解决方案。
 
-## ✨ 主要特性
-
-- 多租户支持
-- 实例的基础操作
-- 详细实例信息展示
-- 跨区域实例管理
-- 直观的Web界面
-
-## 🚀 快速开始
+## 快速开始
 
 ### 1. 准备环境
 ```bash
@@ -40,12 +32,8 @@ tenants:
     regions:
       - "us-phoenix-1"
 ```
-
-### 3. 启动应用
-```bash
-python app.py &
-```
-
+### 3.启动应用(注意启动时需要保证config.yaml配置完全)
+python app.py
 浏览器访问 `http://你的ip:5000`
 
 ## 🔧 配置说明
@@ -60,20 +48,6 @@ python app.py &
 
 1. 使用强密码
 2. 定期更新 OCI API 密钥
-
-## 🖥️ 运行应用
-
-```bash
-python app.py
-```
-
-访问 `http://localhost:5000` 查看管理平台
-
-## 🔒 安全性
-
-- 支持多租户隔离
-- 遵循最小权限原则
-- 敏感信息加密存储
 
 ## 🔍 功能列表
 
