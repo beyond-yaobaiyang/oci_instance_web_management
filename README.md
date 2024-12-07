@@ -17,8 +17,8 @@
 ### 1. 准备环境
 ```bash
 # 克隆项目
-git clone https://github.com/your_username/oci-management-platform.git
-cd oci-management-platform
+git clone [https://github.com/your_username/oci-management-platform.git](https://github.com/beyond-yaobaiyang/oci_instance_web_management)
+cd oci_instance_web_management
 
 # 安装依赖
 pip install -r requirements.txt
