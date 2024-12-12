@@ -20,17 +20,29 @@ pip install -r requirements.txt
 编辑 `config.yaml`，添加您的 OCI 租户配置：
 users 下面是面板登录信息
 ```yaml
-users:
-  - username: admin
-    password: admin123
+
+auth:
+  users:
+  - password: admin #密码
+    role: admin
+    username: admin #用户名
+
 tenants:
-  - name: my_tenant
-    user: ocid1.user.oc1..example
-    tenancy: ocid1.tenancy.oc1..example
-    fingerprint: "ab:cd:ef:12:34:56"
-    key_file: "/path/to/your/private_key.pem"
-    regions:
-      - "us-phoenix-1"
+- compartment_id: ocid1.tenancy.
+  fingerprint: e0:fa:a8:be:c5
+  key_file: c:\U
+  name: 配置1
+  region: ap-chuncheon-1
+  tenancy: ocid1.tenancy.
+  user_ocid: ocid1.user.
+- compartment_id: ocid1.tenancy.
+  fingerprint: e0:fa:a8:b
+  key_file: c:\Us
+  name: 配置2
+  region: ap-sigapore-1
+  tenancy: ocid1.tenancy.
+  user_ocid: ocid1.user.
+
 ```
 ### 3.启动应用(注意启动时需要保证config.yaml配置完全)
 python app.py
@@ -42,7 +54,8 @@ python app.py
 - `tenancy`：租户 OCID
 - `fingerprint`：API 密钥指纹
 - `key_file`：私钥文件路径
-- `regions`：可用区域列表
+- `region`：可用区域
+- `compartment_id` 区间ID(直接填写租户OCID即可)
 
 ## 🔒 安全建议
 
@@ -50,12 +63,22 @@ python app.py
 2. 定期更新 OCI API 密钥
 
 ## 🔍 功能列表
-
--  实例列表展示
--  实例详情查看
--  多区域多租户支持
--  实例启动/停止/重启
--  实例信息的查询
+### 1.面板操作
+  - 查看租户信息配置列表
+  - 修改面板密码
+### 2. 实例操作
+- 用户可以对实例执行以下操作：
+  - **启动实例**：启动处于停止状态的实例。
+  - **停止实例**：停止正在运行的实例。
+  - **重启实例**：重启正在运行的实例。
+  - **终止实例**：永久删除实例。
+  - **实例的创建**：可以创建实例
+    - 支持选择ubuntu和centos7的镜像
+    - 支持ssh root用户登录(目前不可用户指定，一般在实例创建完成后弹出root登录密码)
+- 每次操作后，实例状态会实时更新，用户可以看到最新的状态反馈。
+### 3. 公网IP管理 （执行更换后需要刷新实例列表）
+- 支持更换实例的公网IP地址。
+- 用户可以在实例详情中直接更换公网IP。
 
 
 ## 📄 许可证
