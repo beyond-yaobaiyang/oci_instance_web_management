@@ -13,14 +13,14 @@ tenants:
 - compartment_id: ocid1.tenancy.
   fingerprint: e0:fa:a8:be:c5
   key_file: c:\U
-  name: 
+  name: das
   region: ap-chuncheon-1
   tenancy: ocid1.tenancy.
   user_ocid: ocid1.user.
 - compartment_id: ocid1.tenancy.
   fingerprint: e0:fa:a8:b
   key_file: c:\Us
-  name: 
+  name: dsaqwd
   region: ap-sigapore-1
   tenancy: ocid1.tenancy.
   user_ocid: ocid1.user.
