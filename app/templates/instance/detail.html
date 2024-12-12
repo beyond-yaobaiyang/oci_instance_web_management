@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>实例详情</h2>
+        <a href="{{ url_for('instance.instance_list') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> 返回列表
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div id="loading-indicator" style="display: none;" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+            </div>
+
+            <div id="instance-detail">
+                <!-- 基本信息 -->
+                <div class="mb-4">
+                    <h5 class="border-bottom pb-2">基本信息</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">实例名称：</span>
+                                <span id="instance-name"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">状态：</span>
+                                <span id="instance-state"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">可用性区域：</span>
+                                <span id="instance-ad"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">规格：</span>
+                                <span id="instance-shape"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">创建时间：</span>
+                                <span id="instance-time"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">OCID：</span>
+                                <span class="text-break" id="instance-ocid"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 网络信息 -->
+                <div class="mb-4">
+                    <h5 class="border-bottom pb-2">网络信息</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">公网IP：</span>
+                                <span id="instance-public-ip"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">内网IP：</span>
+                                <span id="instance-private-ip"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">故障域：</span>
+                                <span id="instance-fault-domain"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 配置信息 -->
+                <div class="mb-4">
+                    <h5 class="border-bottom pb-2">配置信息</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">CPU核心数：</span>
+                                <span id="instance-cpu"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <span class="text-muted" style="width: 120px;">内存大小：</span>
+                                <span id="instance-memory"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+.badge.running {
+    background-color: #28a745;
+    color: white;
+}
+.badge.stopped {
+    background-color: #dc3545;
+    color: white;
+}
+.badge.provisioning {
+    background-color: #ffc107;
+    color: #212529;
+}
+.text-break {
+    word-break: break-all;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantId = urlParams.get('tenant_id');
+    const instanceId = urlParams.get('instance_id');
+    
+    if (!tenantId || !instanceId) {
+        alert('缺少必要参数');
+        return;
+    }
+    
+    loadInstanceDetail(tenantId, instanceId);
+});
+
+function loadInstanceDetail(tenantId, instanceId) {
+    showLoading(true);
+    
+    fetch(`/instance/api/instance/${tenantId}/${instanceId}`)
+        .then(response => response.json())
+        .then(instance => {
+            updateInstanceInfo(instance);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('加载实例详情失败，请稍后重试');
+        })
+        .finally(() => {
+            showLoading(false);
+        });
+}
+
+function updateInstanceInfo(instance) {
+    // 基本信息
+    document.getElementById('instance-name').textContent = instance.display_name || '-';
+    document.getElementById('instance-state').innerHTML = getStateLabel(instance.lifecycle_state);
+    document.getElementById('instance-ad').textContent = instance.availability_domain || '-';
+    document.getElementById('instance-shape').textContent = instance.shape || '-';
+    document.getElementById('instance-time').textContent = instance.time_created || '-';
+    document.getElementById('instance-ocid').textContent = instance.id || '-';
+    
+    // 配置信息
+    document.getElementById('instance-cpu').textContent = 
+        instance.shape_config?.ocpus ? `${instance.shape_config.ocpus} 核` : '-';
+    document.getElementById('instance-memory').textContent = 
+        instance.shape_config?.memory_in_gbs ? `${instance.shape_config.memory_in_gbs} GB` : '-';
+
+    // 网络信息
+    document.getElementById('instance-public-ip').textContent = instance.public_ip || '-';
+    document.getElementById('instance-private-ip').textContent = instance.private_ip || '-';
+    document.getElementById('instance-fault-domain').textContent = instance.fault_domain || '-';
+}
+
+function instanceAction(action) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantId = urlParams.get('tenant_id');
+    const instanceId = urlParams.get('instance_id');
+    
+    if (!tenantId || !instanceId) {
+        alert('缺少必要参数');
+        return;
+    }
+
+    const actionMap = {
+        'start': '启动',
+        'stop': '停止',
+        'restart': '重启'
+    };
+
+    if (!confirm(`确定要${actionMap[action]}实例吗？`)) {
+        return;
+    }
+
+    fetch(`/instance/api/${action}/${tenantId}/${instanceId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // 操作成功后，每3秒检查一次状态，直到状态变更完成
+            const checkStatus = () => {
+                fetch(`/instance/api/instance/${tenantId}/${instanceId}`)
+                    .then(response => response.json())
+                    .then(instance => {
+                        updateInstanceInfo(instance);
+                        
+                        // 检查状态是否仍在过渡中
+                        const transitionalStates = ['STARTING', 'STOPPING', 'PROVISIONING'];
+                        if (transitionalStates.includes(instance.lifecycle_state)) {
+                            setTimeout(checkStatus, 3000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            };
+            
+            // 立即开始检查状态
+            checkStatus();
+        } else {
+            alert(result.message || '操作失败，请稍后重试');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('操作失败，请稍后重试');
+    });
+}
+
+function getStateLabel(state) {
+    const stateMap = {
+        'PROVISIONING': ['bg-info', '配置中'],
+        'RUNNING': ['bg-success', '运行中'],
+        'STARTING': ['bg-info', '启动中'],
+        'STOPPING': ['bg-warning', '停止中'],
+        'STOPPED': ['bg-secondary', '已停止'],
+        'TERMINATING': ['bg-danger', '终止中'],
+        'TERMINATED': ['bg-danger', '已终止']
+    };
+    
+    const [bgClass, label] = stateMap[state] || ['bg-secondary', state];
+    return `<span class="badge ${bgClass}">${label}</span>`;
+}
+
+function showLoading(show) {
+    document.getElementById('loading-indicator').style.display = show ? 'block' : 'none';
+    document.getElementById('instance-detail').style.display = show ? 'none' : 'block';
+}
+</script>
+{% endblock %}
