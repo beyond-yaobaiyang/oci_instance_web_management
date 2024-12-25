@@ -16,39 +16,41 @@ cd oci_instance_web_management
 pip install -r requirements.txt
 ```
 
-### 2. 配置租户信息
-编辑 `config.yaml`，添加您的 OCI 租户配置：
+### 2. 配置面板信息
+编辑 `config.yaml`，修改您面板配置：
 users 下面是面板登录信息
 ```yaml
 
+app:
+  secret_key: your-secret-key-here
 auth:
   users:
-  - password: admin #密码
-    role: admin
-    username: admin #用户名
-
-tenants:
-- compartment_id: ocid1.tenancy.
-  fingerprint: e0:fa:a8:be:c5
-  key_file: c:\U
-  name: 配置1
-  region: ap-chuncheon-1
-  tenancy: ocid1.tenancy.
-  user_ocid: ocid1.user.
-- compartment_id: ocid1.tenancy.
-  fingerprint: e0:fa:a8:b
-  key_file: c:\Us
-  name: 配置2
-  region: ap-sigapore-1
-  tenancy: ocid1.tenancy.
-  user_ocid: ocid1.user.
-
+  - mfa_enabled: false 
+    mfa_secret: null
+    password: admin123
+    role: admin （远期规划）
+    username: admin
+security:
+  lockout_duration: 300
+  max_login_attempts: 5
+  mfa_issuer: OCI-Manager
 ```
 ### 3.启动应用(注意启动时需要保证config.yaml配置完全)
 python app.py
 浏览器访问 `http://你的ip:5000`
 
 ## 🔧 配置说明
+租户配置是config/tenants.yaml
+```
+tenants:
+- compartment_id: ocid1.tenancy.oc1.
+  fingerprint: e0:fa:a8:be:c5:3b:e9:11:9a:bb:56:ea:9a:c0:97:5b
+  key_file: c:\Users\a.pem
+  name: das
+  region: ap-chun
+  tenancy: ocid1.tenancy.oc1
+  user_ocid: ocid1.user.oc1.
+```
 - `name`：租户的唯一标识
 - `user`：OCI 用户 OCID
 - `tenancy`：租户 OCID
