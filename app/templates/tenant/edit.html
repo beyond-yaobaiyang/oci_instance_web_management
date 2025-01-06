@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>编辑租户</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">租户名称</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ tenant.name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="user_ocid" class="form-label">用户 OCID</label>
+                            <input type="text" class="form-control" id="user_ocid" name="user_ocid"
+                                   value="{{ tenant.user_ocid }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fingerprint" class="form-label">API 密钥指纹</label>
+                            <input type="text" class="form-control" id="fingerprint" name="fingerprint"
+                                   value="{{ tenant.fingerprint }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="key_file_path" class="form-label">API 私钥文件路径</label>
+                            <input type="text" class="form-control" id="key_file_path" name="key_file_path"
+                                   value="{{ tenant.key_file_path }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tenancy_ocid" class="form-label">租户 OCID</label>
+                            <input type="text" class="form-control" id="tenancy_ocid" name="tenancy_ocid"
+                                   value="{{ tenant.tenancy_ocid }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="region" class="form-label">区域</label>
+                            <select class="form-select" id="region" name="region" required>
+                                <option value="">请选择区域</option>
+                                <option value="us-phoenix-1" {% if tenant.region == 'us-phoenix-1' %}selected{% endif %}>
+                                    Phoenix (us-phoenix-1)
+                                </option>
+                                <option value="us-ashburn-1" {% if tenant.region == 'us-ashburn-1' %}selected{% endif %}>
+                                    Ashburn (us-ashburn-1)
+                                </option>
+                                <option value="eu-frankfurt-1" {% if tenant.region == 'eu-frankfurt-1' %}selected{% endif %}>
+                                    Frankfurt (eu-frankfurt-1)
+                                </option>
+                                <option value="uk-london-1" {% if tenant.region == 'uk-london-1' %}selected{% endif %}>
+                                    London (uk-london-1)
+                                </option>
+                                <option value="ap-tokyo-1" {% if tenant.region == 'ap-tokyo-1' %}selected{% endif %}>
+                                    Tokyo (ap-tokyo-1)
+                                </option>
+                                <option value="ap-seoul-1" {% if tenant.region == 'ap-seoul-1' %}selected{% endif %}>
+                                    Seoul (ap-seoul-1)
+                                </option>
+                                <option value="ap-sydney-1" {% if tenant.region == 'ap-sydney-1' %}selected{% endif %}>
+                                    Sydney (ap-sydney-1)
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">描述</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ tenant.description }}</textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">保存</button>
+                            <a href="{{ url_for('tenant.list_tenants') }}" class="btn btn-secondary">返回列表</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
