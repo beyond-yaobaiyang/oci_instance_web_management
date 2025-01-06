@@ -1,8 +1,0 @@
-tenants:
-- compartment_id: ocid1.tenancy.oc1.
-  fingerprint: e0:fa:a8:be:c5:3b:e9:11:9a:bb:56:ea:9a:c0:97:5b
-  key_file: c:\Users\a.pem
-  name: das
-  region: ap-chun
-  tenancy: ocid1.tenancy.oc1
-  user_ocid: ocid1.user.oc1.
