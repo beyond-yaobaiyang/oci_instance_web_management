@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .login-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 2rem 0;
+    }
+    .login-card {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        border: none;
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.95);
+    }
+    .login-card .card-header {
+        background: transparent;
+        border-bottom: none;
+        padding: 2rem 1rem;
+    }
+    .login-card .card-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .login-card .card-subtitle {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+    .btn-login {
+        padding: 0.75rem;
+        font-weight: 600;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #1d2327 0%, #0e161b 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    }
+    .input-group-text {
+        background: transparent;
+        border-right: none;
+    }
+    .input-group .form-control {
+        border-left: none;
+    }
+</style>
+
+<div class="login-container d-flex align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card login-card">
+                    <div class="card-header text-center">
+                        <h4 class="card-title">OCI API 管理平台</h4>
+                        <p class="card-subtitle">请登录以继续</p>
+                    </div>
+                    <div class="card-body px-4 py-4">
+                        <form method="post" action="{{ url_for('auth.login') }}">
+                            <div class="mb-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="username" name="username" 
+                                           placeholder="请输入用户名" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock text-muted"></i>
+                                    </span>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           placeholder="请输入密码" required>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-login">
+                                    <i class="fas fa-sign-in-alt me-2"></i>登录
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
