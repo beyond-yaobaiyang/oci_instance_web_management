@@ -1,8 +1,0 @@
-tenants:
-- compartment_id: ocid1.tenancy.
-  fingerprint: e0:fa:a8:b
-  key_file: c:\Users\319
-  name: das
-  region: ap-chuncheon-1
-  tenancy: ocid1.tenancy.oc1.
-  user_ocid: ocid1.user.oc1
