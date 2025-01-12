@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .settings-container {
+        padding: 2rem 0;
+    }
+    .settings-card {
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border: none;
+        border-radius: 0.35rem;
+        background: #ffffff;
+    }
+    .settings-header {
+        background: #232731;
+        padding: 1.5rem;
+        color: white;
+    }
+    .settings-body {
+        padding: 1.5rem;
+    }
+    .section {
+        margin-bottom: 2rem;
+    }
+    .section:last-child {
+        margin-bottom: 0;
+    }
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+    .toast {
+        min-width: 250px;
+    }
+</style>
+
+<div class="settings-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="settings-card">
+                    <div class="settings-header">
+                        <h4 class="mb-0">账户设置</h4>
+                    </div>
+                    <div class="settings-body">
+                        <!-- MFA设置部分 -->
+                        <div class="section">
+                            <h5>双因素认证 (MFA)</h5>
+                            <p class="text-muted">使用认证器应用增强账户安全性</p>
+                            
+                            {% if current_user.mfa_enabled %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                MFA 已启用
+                            </div>
+                            <button class="btn btn-danger" id="disableMfaBtn">
+                                <i class="fas fa-times me-2"></i>
+                                禁用 MFA
+                            </button>
+                            {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                建议启用 MFA 以提高账户安全性
+                            </div>
+                            <button class="btn btn-primary" id="setupMfaBtn">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                设置 MFA
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- 密码修改部分 -->
+                        <div class="section">
+                            <h5>修改密码</h5>
+                            <form id="changePasswordForm" method="POST" action="{{ url_for('auth.change_password') }}">
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">当前密码</label>
+                                    <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">新密码</label>
+                                    <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">确认新密码</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-key me-2"></i>
+                                    修改密码
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast消息提示 -->
+<div class="toast-container">
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong class="me-auto" id="toastTitle">提示</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+
+<script>
+// 显示Toast消息
+function showToast(message, type = 'success') {
+    const toast = document.querySelector('.toast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const bsToast = new bootstrap.Toast(toast);
+
+    // 设置样式
+    toast.classList.remove('bg-success', 'bg-danger');
+    toast.classList.add(type === 'success' ? 'bg-success' : 'bg-danger');
+    toast.classList.add('text-white');
+
+    // 设置内容
+    toastTitle.textContent = type === 'success' ? '成功' : '错误';
+    toastMessage.textContent = message;
+
+    // 显示Toast
+    bsToast.show();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 设置MFA按钮
+    const setupMfaBtn = document.getElementById('setupMfaBtn');
+    if (setupMfaBtn) {
+        setupMfaBtn.addEventListener('click', function() {
+            window.location.href = '{{ url_for("auth.setup_mfa_page") }}';
+        });
+    }
+
+    // 禁用MFA按钮
+    const disableMfaBtn = document.getElementById('disableMfaBtn');
+    if (disableMfaBtn) {
+        disableMfaBtn.addEventListener('click', function() {
+            if (confirm('确定要禁用MFA吗？这将降低您账户的安全性。')) {
+                fetch('/auth/mfa/disable', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('MFA已禁用', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        showToast(data.message || '禁用MFA失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    showToast('发生错误：' + error, 'error');
+                });
+            }
+        });
+    }
+
+    // 修改密码表单
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    changePasswordForm.addEventListener('submit', function(e) {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        if (newPassword !== confirmPassword) {
+            e.preventDefault();
+            alert('新密码和确认密码不匹配');
+        }
+    });
+});
+</script>
+{% endblock %}
