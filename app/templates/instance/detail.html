@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="../../static/js/instance/detail_info.js"></script>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>实例详情</h2>
+        <div>
+            <!-- 电源操作按钮组 -->
+            <div class="btn-group me-2" role="group" aria-label="电源操作">
+                <button type="button" class="btn btn-success" onclick="performInstanceAction('start')" id="btn-start">
+                    <i class="fas fa-play"></i> 启动
+                </button>
+                <button type="button" class="btn btn-warning" onclick="performInstanceAction('stop')" id="btn-stop">
+                    <i class="fas fa-stop"></i> 停止
+                </button>
+                <button type="button" class="btn btn-info" onclick="performInstanceAction('reset')" id="btn-reset">
+                    <i class="fas fa-sync"></i> 重启
+                </button>
+                <button type="button" class="btn btn-primary" onclick="showShapeModal()" id="btn-adjust-shape">
+                    <i class="fas fa-cog"></i> 调整形状
+                </button>
+            </div>
+            <a href="{{ url_for('instance.instance_list') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> 返回列表
+            </a>
+            <button onclick="refreshInstanceDetails()" class="btn btn-outline-primary">
+                <i class="fas fa-sync-alt"></i> 刷新
+            </button>
+        </div>
+    </div>
+
+    <div id="loading-indicator" style="display: none;" class="text-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">加载中...</span>
+        </div>
+    </div>
+
+    <div id="instance-detail">
+        <div class="row">
+            {% include "instance/detail_block/basic_info.html" %}
+            {% include "instance/detail_block/network_info.html" %}
+            {% include "instance/detail_block/vnic_info.html" %}
+        </div>
+    </div>
+</div>
+
+<!-- 确认对话框 -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="confirmModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="confirmModalConfirm">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 附加VNIC模态框 -->
+<div class="modal fade" id="attachVnicModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">附加VNIC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="attachVnicForm">
+                    <div class="mb-3">
+                        <label for="vnicName" class="form-label">VNIC名称</label>
+                        <input type="text" class="form-control" id="vnicName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subnetSelect" class="form-label">选择子网</label>
+                        <select class="form-select" id="subnetSelect" required>
+                            <!-- 子网列表将通过JavaScript动态加载 -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="attachVnic()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 调整形状对话框 -->
+<div class="modal fade" id="shapeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">调整实例形状</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="ocpuCount" class="form-label">OCPU数量</label>
+                    <input type="number" class="form-control" id="ocpuCount" min="1" value="1">
+                </div>
+                <div class="mb-3">
+                    <label for="memorySize" class="form-label">内存大小(GB)</label>
+                    <input type="number" class="form-control" id="memorySize" min="1" value="16">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateShape()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast 提示消息 -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast" class="toast" role="alert">
+        <div class="toast-header">
+            <strong class="me-auto">提示</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+</div>
+
+<style>
+.badge {
+    padding: 0.5em 0.75em;
+}
+.btn-group .btn {
+    padding: 0.375rem 1rem;
+}
+.btn-group .btn i {
+    margin-right: 0.25rem;
+}
+</style>
+
+{% endblock %}
