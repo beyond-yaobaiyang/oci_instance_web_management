@@ -1,0 +1,15 @@
+tenants:
+- compartment_id: ocid1.tenancy.oc1
+  fingerprint: e0:fa:a8
+  key_file: c:\
+  name: config1
+  region: ap-regionname-1
+  tenancy: ocid1.tenancy.oc1
+  user_ocid: ocid1.user.oc1
+- compartment_id: ocid1.tenancy.oc1
+  fingerprint: 50:86:c1:55
+  key_file: f:\do
+  name: jdh
+  region: ap-regionname-1
+  tenancy: ocid1.tenancy.oc
+  user_ocid: ocid1.user.oc

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}创建实例{% endblock %}
+
+{% block content %}
+{% include "instance/create_block/bluk.html" %}
+{% include "instance/create_block/result.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="../../static/js/instance/create.js"></script>
+{% endblock %}
