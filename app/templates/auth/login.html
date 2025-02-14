@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .login-container {
+        min-height: 100vh;
+        background: #f8f9fc;
+        display: flex;
+        align-items: center;
+        padding: 2rem 0;
+    }
+    .login-card {
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border: none;
+        border-radius: 0.35rem;
+        background: #ffffff;
+        overflow: hidden;
+    }
+    .login-header {
+        background: #232731;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .login-header h4 {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    .login-header .platform-name {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    .login-body {
+        padding: 1.5rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-control {
+        border-radius: 0.35rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d3e2;
+        font-size: 0.9rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .form-control:focus {
+        border-color: #bac8f3;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    .input-group-text {
+        background: #f8f9fc;
+        border-right: none;
+        color: #858796;
+        padding-right: 0;
+    }
+    .input-group .form-control {
+        border-left: none;
+        padding-left: 0.5rem;
+    }
+    .btn-login {
+        padding: 0.75rem;
+        font-weight: 500;
+        border-radius: 0.35rem;
+        background: #292c35;
+        border: none;
+        transition: all 0.2s;
+        color: white;
+        font-size: 0.9rem;
+    }
+    .btn-login:hover {
+        background: #232735;
+        transform: translateY(-1px);
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .form-label {
+        color: #5a5c69;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="login-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h4>
+                            <i class="fas fa-cloud me-2"></i>
+                            登录系统
+                        </h4>
+                        <div class="platform-name">OCI API 管理平台</div>
+                    </div>
+                    <div class="login-body">
+                        <form method="POST" action="{{ url_for('auth.login') }}">
+                            {% if not show_mfa %}
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-text border-0">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="username" name="username" 
+                                           placeholder="请输入用户名" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-text border-0">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           placeholder="请输入密码" required>
+                                </div>
+                            </div>
+                            {% else %}
+                            <input type="hidden" name="username" value="{{ username }}">
+                            <input type="hidden" name="password" value="{{ password }}">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-text border-0">
+                                        <i class="fas fa-key"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="mfa_token" name="mfa_token" 
+                                           placeholder="请输入MFA验证码" required>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-login">
+                                    <i class="fas fa-sign-in-alt me-2"></i>
+                                    {% if show_mfa %}验证{% else %}登录{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+{% endblock %}

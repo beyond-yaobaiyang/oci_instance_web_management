@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>创建租户</h2>
+        <a href="{{ url_for('tenant.list_tenants') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> 返回列表
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">租户名称</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">用户OCID</label>
+                    <input type="text" class="form-control" name="user_ocid" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">指纹</label>
+                    <input type="text" class="form-control" name="fingerprint" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">私钥文件</label>
+                    <input type="file" class="form-control" name="key_file" accept=".pem" required>
+                    <small class="text-muted">请选择.pem格式的私钥文件</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">租户OCID</label>
+                    <input type="text" class="form-control" name="tenancy" required>
+                    <small class="text-muted">此OCID将同时用作区间ID</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">区域</label>
+                    <select class="form-select" name="region" required>
+                        <option value="">请选择区域</option>
+                        <option value="us-phoenix-1">Phoenix (us-phoenix-1)</option>
+                        <option value="us-ashburn-1">Ashburn (us-ashburn-1)</option>
+                        <option value="eu-frankfurt-1">Frankfurt (eu-frankfurt-1)</option>
+                        <option value="uk-london-1">London (uk-london-1)</option>
+                        <option value="ap-tokyo-1">Tokyo (ap-tokyo-1)</option>
+                        <option value="ap-seoul-1">Seoul (ap-seoul-1)</option>
+                        <option value="ap-sydney-1">Sydney (ap-sydney-1)</option>
+                        <option value="ap-chuncheon-1">Chuncheon (ap-chuncheon-1)</option>
+                    </select>
+                </div>
+                <div class="text-end">
+                    <a href="{{ url_for('tenant.list_tenants') }}" class="btn btn-secondary">返回</a>
+                    <button type="submit" class="btn btn-primary">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+{% endblock %}

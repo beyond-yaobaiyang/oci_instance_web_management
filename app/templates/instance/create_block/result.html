@@ -1,0 +1,39 @@
+<div class="modal fade" id="resultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">创建结果</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="successMessage" style="display: none;">
+                    <div class="alert alert-success">
+                        <h6>实例创建成功！</h6>
+                        <p class="mb-0">
+                            实例名称: <span id="resultInstanceName"></span><br>
+                            实例ID: <span id="resultInstanceId"></span><br>
+                            状态: <span id="resultInstanceState"></span>
+                        </p>
+                    </div>
+                    <div id="passwordSection" style="display: none;">
+                        <div class="alert alert-info">
+                            <h6>登录信息：</h6>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" id="instancePassword" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="copyPassword(this)">
+                                    复制密码
+                                </button>
+                            </div>
+                            <small class="text-warning">请保存此密码，它只会显示一次！</small>
+                        </div>
+                    </div>
+                </div>
+                <div id="errorMessage" style="display: none;" class="alert alert-danger">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
