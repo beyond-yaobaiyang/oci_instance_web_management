@@ -38,14 +38,61 @@
                     <label class="form-label">区域</label>
                     <select class="form-select" name="region" required>
                         <option value="">请选择区域</option>
-                        <option value="us-phoenix-1">Phoenix (us-phoenix-1)</option>
-                        <option value="us-ashburn-1">Ashburn (us-ashburn-1)</option>
-                        <option value="eu-frankfurt-1">Frankfurt (eu-frankfurt-1)</option>
-                        <option value="uk-london-1">London (uk-london-1)</option>
-                        <option value="ap-tokyo-1">Tokyo (ap-tokyo-1)</option>
-                        <option value="ap-seoul-1">Seoul (ap-seoul-1)</option>
-                        <option value="ap-sydney-1">Sydney (ap-sydney-1)</option>
-                        <option value="ap-chuncheon-1">Chuncheon (ap-chuncheon-1)</option>
+                        <!-- 北美洲 -->
+                        <optgroup label="北美洲">
+                            <option value="us-ashburn-1">US East (Ashburn)</option>
+                            <option value="us-chicago-1">US Midwest (Chicago)</option>
+                            <option value="us-phoenix-1">US West (Phoenix)</option>
+                            <option value="us-sanjose-1">US West (San Jose)</option>
+                            <option value="ca-montreal-1">Canada Southeast (Montreal)</option>
+                            <option value="ca-toronto-1">Canada Southeast (Toronto)</option>
+                            <option value="mx-queretaro-1">Mexico Central (Querétaro)</option>
+                            <option value="mx-monterrey-1">Mexico Northeast (Monterrey)</option>
+                        </optgroup>
+                        <!-- 南美洲 -->
+                        <optgroup label="南美洲">
+                            <option value="sa-saopaulo-1">Brazil East (Sao Paulo)</option>
+                            <option value="sa-vinhedo-1">Brazil Southeast (Vinhedo)</option>
+                            <option value="sa-santiago-1">Chile Central (Santiago)</option>
+                            <option value="sa-valparaiso-1">Chile West (Valparaiso)</option>
+                            <option value="sa-bogota-1">Colombia Central (Bogota)</option>
+                        </optgroup>
+                        <!-- 欧洲 -->
+                        <optgroup label="欧洲">
+                            <option value="eu-paris-1">France Central (Paris)</option>
+                            <option value="eu-marseille-1">France South (Marseille)</option>
+                            <option value="eu-frankfurt-1">Germany Central (Frankfurt)</option>
+                            <option value="eu-milan-1">Italy Northwest (Milan)</option>
+                            <option value="eu-amsterdam-1">Netherlands Northwest (Amsterdam)</option>
+                            <option value="eu-jovanovac-1">Serbia Central (Jovanovac)</option>
+                            <option value="eu-madrid-1">Spain Central (Madrid)</option>
+                            <option value="eu-stockholm-1">Sweden Central (Stockholm)</option>
+                            <option value="eu-zurich-1">Switzerland North (Zurich)</option>
+                            <option value="uk-london-1">UK South (London)</option>
+                            <option value="uk-newport-1">UK West (Newport)</option>
+                        </optgroup>
+                        <!-- 中东和非洲 -->
+                        <optgroup label="中东和非洲">
+                            <option value="il-jerusalem-1">Israel Central (Jerusalem)</option>
+                            <option value="me-jeddah-1">Saudi Arabia West (Jeddah)</option>
+                            <option value="me-riyadh-1">Saudi Arabia Central (Riyadh)</option>
+                            <option value="af-johannesburg-1">South Africa Central (Johannesburg)</option>
+                            <option value="me-dubai-1">UAE East (Dubai)</option>
+                            <option value="me-abudhabi-1">UAE Central (Abu Dhabi)</option>
+                        </optgroup>
+                        <!-- 亚太地区 -->
+                        <optgroup label="亚太地区">
+                            <option value="ap-sydney-1">Australia East (Sydney)</option>
+                            <option value="ap-melbourne-1">Australia Southeast (Melbourne)</option>
+                            <option value="ap-mumbai-1">India West (Mumbai)</option>
+                            <option value="ap-hyderabad-1">India South (Hyderabad)</option>
+                            <option value="ap-tokyo-1">Japan East (Tokyo)</option>
+                            <option value="ap-osaka-1">Japan Central (Osaka)</option>
+                            <option value="ap-singapore-1">Singapore (Singapore)</option>
+                            <option value="ap-singapore-2">Singapore West (Singapore)</option>
+                            <option value="ap-seoul-1">South Korea Central (Seoul)</option>
+                            <option value="ap-chuncheon-1">South Korea North (Chuncheon)</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="text-end">
@@ -56,16 +103,4 @@
         </div>
     </div>
 </div>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
-
 {% endblock %}
