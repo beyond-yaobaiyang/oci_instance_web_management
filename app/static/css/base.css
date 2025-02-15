@@ -79,6 +79,26 @@ body {
     margin-right: .5rem;
 }
 
+/* 错误提示框样式 */
+.swal2-popup {
+    font-size: 0.9rem !important;
+}
+
+.swal2-container {
+    z-index: 9999 !important;
+}
+
+/* Toast 提示框样式 */
+.toast-container {
+    z-index: 9999 !important;
+}
+
+.toast {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    color: #333 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
 /* 响应式布局调整 */
 @media (max-width: 768px) {
     .navbar-nav {
