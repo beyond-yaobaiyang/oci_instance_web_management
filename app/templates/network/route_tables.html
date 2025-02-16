@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% block title %}路由表管理{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">路由表管理</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <select class="form-control" id="tenant-select">
+                                <option value="">选择租户</option>
+                                {% for tenant in tenants %}
+                                <option value="{{ tenant.id }}">{{ tenant.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-control" id="vcn-select" disabled>
+                                <option value="">选择VCN</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>名称</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="route-table-list">
+                                <tr>
+                                    <td colspan="4" class="text-center">请选择租户和VCN</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 路由规则编辑模态框 -->
+<div class="modal fade" id="routeRulesModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">编辑路由规则</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>目标CIDR</th>
+                                <th>目标类型</th>
+                                <th>下一跳实体ID</th>
+                                <th>描述</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="route-rules-list">
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-primary" id="add-rule-btn">
+                    <i class="fas fa-plus"></i> 添加规则
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="save-rules-btn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    let currentTenantId = '';
+    let currentRouteTableId = '';
+    let currentRouteRules = [];
+
+    // 初始化toastr配置
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "3000"
+    };
+
+    // 监听租户选择
+    $('#tenant-select').change(function() {
+        const tenantId = $(this).val();
+        currentTenantId = tenantId;
+        
+        if (tenantId) {
+            // 加载VCN列表
+            $('#vcn-select').prop('disabled', true);
+            $.ajax({
+                url: `/network/api/vcns/${tenantId}`,
+                method: 'GET',
+                success: function(vcns) {
+                    console.log('获取到VCN列表:', vcns);
+                    $('#vcn-select').empty().append('<option value="">选择VCN</option>');
+                    vcns.forEach(vcn => {
+                        $('#vcn-select').append(`<option value="${vcn.id}">${vcn.display_name}</option>`);
+                    });
+                    $('#vcn-select').prop('disabled', false);
+                },
+                error: function(xhr, status, error) {
+                    console.error('加载VCN列表失败:', error);
+                    toastr.error('加载VCN列表失败: ' + error);
+                    $('#vcn-select').prop('disabled', true)
+                        .empty()
+                        .append('<option value="">选择VCN</option>');
+                }
+            });
+        } else {
+            $('#vcn-select').prop('disabled', true)
+                .empty()
+                .append('<option value="">选择VCN</option>');
+            $('#route-table-list').html('<tr><td colspan="4" class="text-center">请选择租户和VCN</td></tr>');
+        }
+    });
+
+    // 监听VCN选择
+    $('#vcn-select').change(function() {
+        const vcnId = $(this).val();
+        if (vcnId && currentTenantId) {
+            loadRouteTables(currentTenantId, vcnId);
+        } else {
+            $('#route-table-list').html('<tr><td colspan="4" class="text-center">请选择租户和VCN</td></tr>');
+        }
+    });
+
+    // 加载路由表列表
+    function loadRouteTables(tenantId, vcnId) {
+        $.ajax({
+            url: `/network/api/route_tables/${tenantId}?vcn_id=${vcnId}`,
+            method: 'GET',
+            success: function(routeTables) {
+                console.log('获取到路由表列表:', routeTables);
+                let html = '';
+                if (routeTables && routeTables.length > 0) {
+                    routeTables.forEach(rt => {
+                        html += `
+                            <tr>
+                                <td>${rt.display_name}</td>
+                                <td>${rt.lifecycle_state}</td>
+                                <td>${new Date(rt.time_created).toLocaleString()}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary edit-rules-btn" data-id="${rt.id}">
+                                        编辑规则
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    html = '<tr><td colspan="4" class="text-center">没有找到路由表</td></tr>';
+                }
+                $('#route-table-list').html(html);
+            },
+            error: function(xhr, status, error) {
+                console.error('加载路由表列表失败:', error);
+                toastr.error('加载路由表列表失败: ' + error);
+                $('#route-table-list').html('<tr><td colspan="4" class="text-center">加载路由表失败</td></tr>');
+            }
+        });
+    }
+
+    // 编辑规则按钮点击事件
+    $(document).on('click', '.edit-rules-btn', function() {
+        const routeTableId = $(this).data('id');
+        currentRouteTableId = routeTableId;
+        
+        // 加载路由规则
+        $.ajax({
+            url: `/network/api/route_tables/${currentTenantId}/${routeTableId}/rules`,
+            method: 'GET',
+            success: function(routeTable) {
+                // 给已有规则添加标记
+                currentRouteRules = (routeTable.route_rules || []).map(rule => ({
+                    ...rule,
+                    isExisting: true  // 标记为已有规则
+                }));
+                renderRouteRules();
+                $('#routeRulesModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error('加载路由规则失败:', error);
+                toastr.error('加载路由规则失败: ' + error);
+            }
+        });
+    });
+
+    // 添加新规则
+    $('#add-rule-btn').click(function() {
+        currentRouteRules.push({
+            destination: '0.0.0.0/0',
+            destination_type: 'CIDR_BLOCK',
+            network_entity_id: '',
+            description: '新规则',
+            isExisting: false  // 标记为新规则
+        });
+        renderRouteRules();
+    });
+
+    // 渲染路由规则列表
+    function renderRouteRules() {
+        // 获取网络实体列表
+        const vcnId = $('#vcn-select').val();
+        if (!vcnId) {
+            toastr.error('请先选择VCN');
+            return;
+        }
+
+        $.ajax({
+            url: `/network/api/network_entities/${currentTenantId}/${vcnId}`,
+            method: 'GET',
+            success: function(entities) {
+                let html = '';
+                currentRouteRules.forEach((rule, index) => {
+                    html += `
+                        <tr>
+                            <td>
+                                <input type="text" class="form-control" value="${rule.destination || ''}" 
+                                       onchange="updateRule(${index}, 'destination', this.value)"
+                                       required>
+                            </td>
+                            <td>
+                                <select class="form-control" onchange="updateRule(${index}, 'destination_type', this.value)">
+                                    <option value="CIDR_BLOCK" ${rule.destination_type === 'CIDR_BLOCK' ? 'selected' : ''}>CIDR</option>
+                                    <option value="SERVICE_CIDR_BLOCK" ${rule.destination_type === 'SERVICE_CIDR_BLOCK' ? 'selected' : ''}>服务CIDR</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-control" onchange="updateRule(${index}, 'network_entity_id', this.value)" required>
+                                    <option value="">选择下一跳实体</option>
+                                    ${entities.map(entity => `
+                                        <option value="${entity.id}" ${rule.network_entity_id === entity.id ? 'selected' : ''}>
+                                            ${entity.display_name} (${entity.type})
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="${rule.description || ''}"
+                                       onchange="updateRule(${index}, 'description', this.value)"
+                                       placeholder="请输入描述"
+                                       required>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="removeRule(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $('#route-rules-list').html(html);
+            },
+            error: function(xhr, status, error) {
+                console.error('加载网络实体列表失败:', error);
+                toastr.error('加载网络实体列表失败: ' + error);
+            }
+        });
+    }
+
+    // 更新规则
+    window.updateRule = function(index, field, value) {
+        if (index >= 0 && index < currentRouteRules.length) {
+            const rule = currentRouteRules[index];
+            // 只验证新规则
+            if (!rule.isExisting && (field === 'network_entity_id' || field === 'description')) {
+                if (!value) {
+                    toastr.error(`${field === 'network_entity_id' ? '下一跳实体' : '描述'} 不能为空`);
+                    renderRouteRules(); // 重新渲染以恢复原值
+                    return;
+                }
+                if (value.length > 255) {
+                    toastr.error(`${field === 'network_entity_id' ? '下一跳实体' : '描述'} 长度不能超过255个字符`);
+                    renderRouteRules(); // 重新渲染以恢复原值
+                    return;
+                }
+            }
+            currentRouteRules[index][field] = value;
+        }
+    };
+
+    // 删除规则
+    window.removeRule = function(index) {
+        currentRouteRules.splice(index, 1);
+        renderRouteRules();
+    };
+
+    // 保存规则按钮点击事件
+    $('#save-rules-btn').click(function() {
+        // 只验证新规则
+        let hasError = false;
+        currentRouteRules.forEach((rule, index) => {
+            if (!rule.isExisting) {  // 只验证新规则
+                if (!rule.network_entity_id || !rule.description) {
+                    toastr.error(`第 ${index + 1} 条规则的下一跳实体和描述不能为空`);
+                    hasError = true;
+                }
+                if (rule.description && rule.description.length > 255) {
+                    toastr.error(`第 ${index + 1} 条规则的描述长度不能超过255个字符`);
+                    hasError = true;
+                }
+            }
+        });
+
+        if (hasError) {
+            return;
+        }
+
+        // 发送请求前移除 isExisting 标记
+        const rulesToSave = currentRouteRules.map(({ isExisting, ...rule }) => rule);
+
+        $.ajax({
+            url: `/network/api/route_tables/${currentTenantId}/${currentRouteTableId}/rules`,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                route_rules: rulesToSave
+            }),
+            success: function() {
+                toastr.success('路由规则保存成功');
+                $('#routeRulesModal').modal('hide');
+                // 刷新路由表列表
+                const vcnId = $('#vcn-select').val();
+                if (vcnId) {
+                    loadRouteTables(currentTenantId, vcnId);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('保存路由规则失败:', error);
+                toastr.error('保存路由规则失败: ' + error);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

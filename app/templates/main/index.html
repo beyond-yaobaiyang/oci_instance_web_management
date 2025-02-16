@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="jumbotron animate__animated animate__fadeIn">
+        <h1 class="display-4">欢迎使用 OCI API 管理平台</h1>
+        <p class="lead">这是一个基于python-Web开发的Oracle Cloud Infrastructure资源管理平台。</p>
+        <hr class="my-4">
+        <p>您可以通过此平台管理以下资源：</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- 租户管理 -->
+        <div class="col-md-6 col-lg-4 animate__animated animate__fadeInUp animate__delay-1s">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-users me-2"></i>
+                        租户管理
+                    </h5>
+                    <p class="card-text flex-grow-1">管理OCI租户配置和凭证</p>
+                    <a href="{{ url_for('tenant.list_tenants') }}" class="btn btn-primary mt-3 btn-hover-effect">
+                        <i class="fas fa-arrow-right icon-hover-effect"></i> 进入管理
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 资源查询 -->
+        <div class="col-md-6 col-lg-4 animate__animated animate__fadeInUp animate__delay-2s">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-chart-line me-2"></i>
+                        资源查询
+                    </h5>
+                    <p class="card-text flex-grow-1">查询订阅、配额和使用量信息</p>
+                    <div class="btn-group mt-3 w-100">
+                        <a href="{{ url_for('subscription.subscription_list') }}" class="btn btn-primary btn-hover-effect">
+                            <i class="fas fa-clipboard-list me-1 icon-hover-effect"></i> 订阅
+                        </a>
+                        <a href="{{ url_for('quota.quota_list') }}" class="btn btn-primary btn-hover-effect">
+                            <i class="fas fa-chart-pie me-1 icon-hover-effect"></i> 配额
+                        </a>
+                        <a href="{{ url_for('usage.list_usage') }}" class="btn btn-primary btn-hover-effect">
+                            <i class="fas fa-calculator me-1 icon-hover-effect"></i> 使用量
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实例管理 -->
+        <div class="col-md-6 col-lg-4 animate__animated animate__fadeInUp animate__delay-3s">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-server me-2"></i>
+                        实例管理
+                    </h5>
+                    <p class="card-text flex-grow-1">管理计算实例的创建、启动、停止等操作</p>
+                    <a href="{{ url_for('instance.instance_list') }}" class="btn btn-primary mt-3 btn-hover-effect">
+                        <i class="fas fa-arrow-right icon-hover-effect"></i> 进入管理
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 网络管理 -->
+        <div class="col-md-6 col-lg-4 animate__animated animate__fadeInUp animate__delay-4s">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-network-wired me-2"></i>
+                        网络管理
+                    </h5>
+                    <p class="card-text flex-grow-1">管理网络安全组和路由规则</p>
+                    <div class="btn-group mt-3 w-100">
+                        <a href="{{ url_for('network.security_groups') }}" class="btn btn-primary btn-hover-effect">
+                            <i class="fas fa-shield-alt me-1 icon-hover-effect"></i> 安全组
+                        </a>
+                        <a href="{{ url_for('network.route_tables') }}" class="btn btn-primary btn-hover-effect">
+                            <i class="fas fa-route me-1 icon-hover-effect"></i> 路由表
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<style>
+.btn-group .btn {
+    padding: 0.5rem 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-title {
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    padding-bottom: 0.5rem;
+}
+
+.card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(225deg, transparent 0%, rgba(255,255,255,0.2) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,.1);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.btn-hover-effect {
+    transition: all 0.3s ease;
+    background-image: linear-gradient(to right, #0d6efd, #0b5ed7);
+}
+
+.btn-hover-effect:hover {
+    background-image: linear-gradient(to right, #0b5ed7, #0a58ca);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+}
+
+.icon-hover-effect {
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.btn:hover .icon-hover-effect {
+    transform: translateX(3px);
+}
+
+/* 添加脉冲动画效果 */
+@keyframes pulse-border {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+    }
+}
+
+.btn-primary:active {
+    animation: pulse-border 0.6s;
+}
+
+/* 添加波纹效果 */
+.btn-hover-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease-out, height 0.6s ease-out;
+}
+
+.btn-hover-effect:active::after {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+}
+</style>
+{% endblock %}
