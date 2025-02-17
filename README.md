@@ -18,8 +18,11 @@ pip install -r requirements.txt
 ##docker快速部署
 建议docker版本26.1.3
 默认密码为admin123
+```
 docker run -d --name oci-api -p 5000:5000 -v data:/app/data -v logs:/app/logs -v config:/app/config -e FLASK_APP=app.py -e FLASK_ENV=production --restart unless-stopped yaobaiyang/oci_python_web
-### 2. 配置租户信息（由于添加前端接口，该方案可以护士）
+```
+
+### 2. 配置租户信息
 编辑 `config.yaml`，添加您的 OCI 租户配置：
 users 下面是面板登录信息
 ```yaml
