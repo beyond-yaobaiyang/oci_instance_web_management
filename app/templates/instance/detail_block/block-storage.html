@@ -1,0 +1,96 @@
+<!-- 引导卷管理 -->
+<div class="card">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-hdd me-2"></i>引导卷管理
+        </h5>
+        <div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="showAttachBootVolumeModal()">
+                <i class="fas fa-plus"></i> 附加引导卷
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>大小(GB)</th>
+                        <th>VPU/GB</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="bootVolumesList">
+                    <tr>
+                        <td colspan="5" class="text-center">加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 附加引导卷模态框 -->
+<div class="modal fade" id="attachBootVolumeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">附加引导卷</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="attachBootVolumeForm">
+                    <div class="mb-3">
+                        <label for="bootVolumeSelect" class="form-label">选择引导卷</label>
+                        <select class="form-select" id="bootVolumeSelect" required>
+                            <option value="">请选择...</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        注意：只能在实例关机状态下附加引导卷
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="attachBootVolume()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 更新引导卷模态框 -->
+<div class="modal fade" id="updateBootVolumeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">更新引导卷</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateBootVolumeForm">
+                    <div class="mb-3">
+                        <label for="bootVolumeSizeInput" class="form-label">卷大小(GB)</label>
+                        <input type="number" class="form-control" id="bootVolumeSizeInput" min="1" step="1">
+                        <small class="text-muted">注意：引导卷大小只能增加不能减少</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bootVolumeVpuInput" class="form-label">VPU/GB</label>
+                        <select class="form-select" id="bootVolumeVpuInput">
+                            <option value="0">0 (低性能)</option>
+                            <option value="10">10 (平衡性能)</option>
+                            <option value="20">20 (高性能)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateBootVolume()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
