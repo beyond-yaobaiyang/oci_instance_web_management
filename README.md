@@ -5,7 +5,7 @@
 本项目是一个基于 Oracle Cloud Infrastructure (OCI) python sdk的实例管理系统，旨在提供简单、高效的多租户实例管理解决方案。
 
 ## 快速开始
-
+##源代码部署
 ### 1. 准备环境
 ```bash
 # 克隆项目
@@ -15,15 +15,18 @@ cd oci_instance_web_management
 # 安装依赖
 pip install -r requirements.txt
 ```
-
-### 2. 配置租户信息
+##docker快速部署
+建议docker版本26.1.3
+默认密码为admin123
+docker run -d --name oci-api -p 5000:5000 -v data:/app/data -v logs:/app/logs -v config:/app/config -e FLASK_APP=app.py -e FLASK_ENV=production --restart unless-stopped yaobaiyang/oci_python_web
+### 2. 配置租户信息（由于添加前端接口，该方案可以护士）
 编辑 `config.yaml`，添加您的 OCI 租户配置：
 users 下面是面板登录信息
 ```yaml
 
 auth:
   users:
-  - password: admin #密码
+  - password: admin123 #密码
     role: admin
     username: admin #用户名
 
