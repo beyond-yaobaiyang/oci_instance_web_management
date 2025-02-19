@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}使用量查询{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">资源使用量查询</h5>
+        </div>
+        <div class="card-body">
+            <form id="usageForm" method="GET" action="{{ url_for('usage.list_usage') }}">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">租户</label>
+                            <select name="tenant_id" id="tenant_id" class="form-select">
+                                <option value="">请选择租户</option>
+                                {% for tenant in tenants %}
+                                <option value="{{ tenant.id }}" {% if tenant.id == tenant_id %}selected{% endif %}>
+                                    {{ tenant.name }}--区域:{{ tenant.region }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">开始时间</label>
+                            <input type="datetime-local" class="form-control" name="start_time" id="start_time" 
+                                value="{{ request.args.get('start_time', '') }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label">结束时间</label>
+                            <input type="datetime-local" class="form-control" name="end_time" id="end_time" 
+                                value="{{ request.args.get('end_time', '') }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">查询</button>
+                    </div>
+                </div>
+            </form>
+
+            {% if usage_data %}
+            <div class="table-responsive mt-3">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>服务</th>
+                            <th>SKU名称</th>
+                            <th class="text-end">使用量</th>
+                            <th>单位</th>
+                            <th class="text-end">费用 (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in usage_data %}
+                        <tr>
+                            <td>{{ item.service }}</td>
+                            <td>{{ item.sku_name }}</td>
+                            <td class="text-end">{{ "%.2f"|format(item.total_quantity|float) }}</td>
+                            <td>{{ item.unit }}</td>
+                            <td class="text-end">{{ "%.2f"|format(item.total_cost|float) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" class="text-end">总费用:</td>
+                            <td class="text-end">{{ "%.2f"|format(usage_data|sum(attribute='total_cost')) }} USD</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info mt-3">
+                请选择租户和时间范围进行查询
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 如果URL中没有时间参数，则设置默认时间范围
+    if (!document.getElementById('start_time').value || !document.getElementById('end_time').value) {
+        const now = new Date();
+        const start = new Date(now.getTime() - (12 * 60 * 60 * 1000));
+        const end = now;
+
+        document.getElementById('start_time').value = start.toISOString().slice(0, 16);
+        document.getElementById('end_time').value = end.toISOString().slice(0, 16);
+    }
+
+    // 表单提交前验证
+    document.getElementById('usageForm').addEventListener('submit', function(e) {
+        const tenant = document.getElementById('tenant_id').value;
+        if (!tenant) {
+            e.preventDefault();
+            alert('请选择租户');
+            return;
+        }
+
+        const startTime = new Date(document.getElementById('start_time').value);
+        const endTime = new Date(document.getElementById('end_time').value);
+        
+        if (endTime <= startTime) {
+            e.preventDefault();
+            alert('结束时间必须大于开始时间');
+        }
+    });
+});
+</script>
+{% endblock %}

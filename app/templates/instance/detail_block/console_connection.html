@@ -1,0 +1,49 @@
+<div class="col-12 mb-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">控制台连接</h5>
+            <div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="createConsoleConnection()" id="btn-create-console">
+                    <i class="fas fa-plus"></i> 创建连接
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteConsoleConnection()" id="btn-delete-console" style="display: none;">
+                    <i class="fas fa-trash"></i> 删除连接
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="console-connection-status">
+                <!-- 状态信息将通过JavaScript动态更新 -->
+                <div class="text-muted">未创建控制台连接</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 创建控制台连接模态框 -->
+<div class="modal fade" id="createConsoleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">创建控制台连接</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="consoleConnectionForm">
+                    <div class="mb-3">
+                        <label for="publicKey" class="form-label">SSH公钥</label>
+                        <textarea class="form-control" id="publicKey" rows="5" required 
+                            placeholder="请输入SSH公钥内容，以ssh-rsa开头"></textarea>
+                        <div class="form-text">
+                            请确保提供有效的SSH公钥。这将用于安全地连接到实例控制台。
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitConsoleConnection()">创建</button>
+            </div>
+        </div>
+    </div>
+</div>

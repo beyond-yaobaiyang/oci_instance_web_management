@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>安全组管理</h2>
+    
+    <!-- 租户选择区域 -->
+    <div class="mb-3">
+        <label for="tenantSelect" class="form-label">选择租户</label>
+        <select class="form-select" id="tenantSelect">
+            <option value="">请选择租户</option>
+            {% for tenant in tenants %}
+            <option value="{{ tenant.id }}">{{ tenant.name }}--区域:{{ tenant.region }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- 安全组列表卡片 -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-outline-secondary" id="refreshBtn" disabled>
+                    <i class="fas fa-sync"></i> 刷新
+                </button>
+            </div>
+            
+            <!-- 加载指示器 -->
+            <div id="loading-indicator" style="display: none;" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+            </div>
+            
+            <!-- 安全组列表表格 -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>安全组名称</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="securityGroupsTableBody">
+                        <tr>
+                            <td colspan="4" class="text-center">请选择租户</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 规则管理模态框 -->
+<div class="modal fade" id="rulesModal">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">规则管理</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- 规则类型切换 -->
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#ingressRules">入站规则</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#egressRules">出站规则</a>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <!-- 入站规则 -->
+                    <div class="tab-pane fade show active" id="ingressRules">
+                        <div class="mb-3">
+                            <button class="btn btn-sm btn-primary" id="addIngressRule">
+                                <i class="fas fa-plus"></i> 添加入站规则
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>状态跟踪</th>
+                                        <th>源</th>
+                                        <th>协议</th>
+                                        <th>描述</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ingressRulesTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- 出站规则 -->
+                    <div class="tab-pane fade" id="egressRules">
+                        <div class="mb-3">
+                            <button class="btn btn-sm btn-primary" id="addEgressRule">
+                                <i class="fas fa-plus"></i> 添加出站规则
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>状态跟踪</th>
+                                        <th>目标</th>
+                                        <th>协议</th>
+                                        <th>描述</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="egressRulesTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="saveRules">保存规则</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加规则模态框 -->
+<div class="modal fade" id="ruleModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加规则</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="ruleForm">
+                    <div class="mb-3">
+                        <label for="ruleStateless" class="form-label">状态跟踪</label>
+                        <select class="form-select" id="ruleStateless">
+                            <option value="false">有状态</option>
+                            <option value="true">无状态</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ruleSource" class="form-label">源/目标</label>
+                        <input type="text" class="form-control" id="ruleSource" required>
+                        <div class="form-text">CIDR格式，如: 0.0.0.0/0</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ruleProtocol" class="form-label">协议</label>
+                        <select class="form-select" id="ruleProtocol">
+                            <option value="all">全部</option>
+                            <option value="6">TCP</option>
+                            <option value="17">UDP</option>
+                            <option value="1">ICMP</option>
+                        </select>
+                    </div>
+                    <div id="portConfig" class="mb-3" style="display: none;">
+                        <div class="row">
+                            <div class="col">
+                                <label for="sourcePortMin" class="form-label">源端口范围</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="sourcePortMin" placeholder="最小" min="1" max="65535">
+                                    <span class="input-group-text">-</span>
+                                    <input type="number" class="form-control" id="sourcePortMax" placeholder="最大" min="1" max="65535">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col">
+                                <label for="destPortMin" class="form-label">目标端口范围</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="destPortMin" placeholder="最小" min="1" max="65535">
+                                    <span class="input-group-text">-</span>
+                                    <input type="number" class="form-control" id="destPortMax" placeholder="最大" min="1" max="65535">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ruleDescription" class="form-label">描述</label>
+                        <textarea class="form-control" id="ruleDescription" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveRule">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 消息提示框 -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">提示</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/network/security_groups.js') }}"></script>
+{% endblock %}
