@@ -3,6 +3,11 @@
 ## 项目概述
 
 本项目是一个基于 Oracle Cloud Infrastructure (OCI) python sdk的实例管理系统，旨在提供简单、高效的多租户实例管理解决方案。
+## docker 快速开始
+
+```
+docker run -d --name oci-api -p 5000:5000 -v "./data:/app/data" -v "./logs:/app/logs" -v "./config:/app/config" -e FLASK_APP=app.py -e FLASK_ENV=production --restart unless-stopped yaobaiyang/oci_python_web
+```
 
 ## 快速开始
 
